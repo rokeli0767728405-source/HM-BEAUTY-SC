@@ -1,5 +1,6 @@
 const DB_KEY="hm_beauty_sc_products_v3";
 const CAT_KEY="hm_beauty_sc_categories_v1";
+const DRAFT_KEY="hm_beauty_sc_draft_v1";
 let products=loadProducts(),categories=loadCategories(),stream=null,scanActive=false,pendingPhoto="";
 const $=id=>document.getElementById(id);
 
@@ -7,6 +8,45 @@ function loadProducts(){try{return JSON.parse(localStorage.getItem(DB_KEY)||"[]"
 function loadCategories(){try{const a=JSON.parse(localStorage.getItem(CAT_KEY)||"[]");return Array.isArray(a)?a:[]}catch{return []}}
 function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(products));localStorage.setItem(CAT_KEY,JSON.stringify(categories));render()}catch(e){toast("مساحة التخزين ممتلئة. خفّض حجم الصور أو صدّر نسخة احتياطية.")}}
 function saveCategories(){try{localStorage.setItem(CAT_KEY,JSON.stringify(categories));renderCategoryUI();render()}catch{toast("تعذر حفظ الفئات")}}
+function saveDraft(){
+ try{
+  const draft={
+   id:$("productId").value,
+   name:$("name").value,
+   barcode:$("barcode").value,
+   buyPrice:$("buyPrice").value,
+   sellPrice:$("sellPrice").value,
+   quantity:$("quantity").value,
+   threshold:$("threshold").value,
+   categoryId:$("category").value,
+   photo:pendingPhoto
+  };
+  localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));
+ }catch(e){}
+}
+
+function restoreDraft(){
+ try{
+  const raw=localStorage.getItem(DRAFT_KEY);
+  if(!raw)return;
+  const d=JSON.parse(raw);
+  if(!d||typeof d!=="object")return;
+  $("productId").value=d.id||"";
+  $("name").value=d.name||"";
+  $("barcode").value=d.barcode||"";
+  $("buyPrice").value=d.buyPrice??"";
+  $("sellPrice").value=d.sellPrice??"";
+  $("quantity").value=d.quantity??0;
+  $("threshold").value=d.threshold??3;
+  pendingPhoto=d.photo||"";
+  renderCategoryUI();
+  $("category").value=d.categoryId||"";
+  updatePhotoPreview();
+  updateProfit();
+  $("formTitle").textContent=d.id?"تعديل منتج":"إضافة منتج";
+  $("productDialog").showModal();
+ }catch(e){}
+}
 function money(n){return Number(n||0).toLocaleString("fr-MA",{minimumFractionDigits:2,maximumFractionDigits:2})+" DH"}
 function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2600)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -53,6 +93,10 @@ $("buyPrice").oninput=$("sellPrice").oninput=updateProfit;
 $("photo").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")){toast("اختر ملف صورة صحيحاً");return}try{pendingPhoto=await compressImage(f);updatePhotoPreview()}catch{toast("تعذرت قراءة الصورة")}};
 function compressImage(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,640/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",.62))};img.onerror=reject;img.src=url})}
 $("removePhoto").onclick=()=>{pendingPhoto="";$("photo").value="";updatePhotoPreview()};
+["name","barcode","buyPrice","sellPrice","quantity","threshold","category"].forEach(id=>{
+  $(id).addEventListener("input",saveDraft);
+  $(id).addEventListener("change",saveDraft);
+});
 $("productForm").onsubmit=e=>{
  e.preventDefault();const id=$("productId").value||String(Date.now());
  const item={id,name:$("name").value.trim(),barcode:$("barcode").value.trim(),buyPrice:Number($("buyPrice").value),sellPrice:Number($("sellPrice").value),quantity:Math.max(0,Number($("quantity").value)),threshold:Math.max(0,Number($("threshold").value)),photo:pendingPhoto,categoryId:$("category").value||""};
@@ -201,9 +245,9 @@ async function startScanner(){
       if(found){
        showScanResult(found,code);
       }else{
-       openForm();
-       $("barcode").value = code;
-       toast("باركود جديد: أكمل بيانات المنتج");
+  if(!$("productDialog").open) openForm();
+  $("barcode").value = code;
+  toast("باركود جديد: أكمل بيانات المنتج");
       }
       return;
      }
