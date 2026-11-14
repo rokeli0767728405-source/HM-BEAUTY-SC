@@ -90,7 +90,7 @@ function updateProfit(){$("unitProfit").textContent=money(Number($("sellPrice").
 $("addBtn").onclick=$("navAdd").onclick=()=>openForm();
 $("closeDialog").onclick=$("cancelForm").onclick=()=>$("productDialog").close();
 $("buyPrice").oninput=$("sellPrice").oninput=updateProfit;
-$("photo").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")){toast("اختر ملف صورة صحيحاً");return}try{pendingPhoto=await compressImage(f);updatePhotoPreview()}catch{toast("تعذرت قراءة الصورة")}};
+$("photo").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")){toast("اختر ملف صورة صحيحاً");return}try{pendingPhoto=await compressImage(f);updatePhotoPreview();saveDraft()}catch{toast("تعذرت قراءة الصورة")}};
 function compressImage(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,640/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",.62))};img.onerror=reject;img.src=url})}
 $("removePhoto").onclick=()=>{pendingPhoto="";$("photo").value="";updatePhotoPreview()};
 ["name","barcode","buyPrice","sellPrice","quantity","threshold","category"].forEach(id=>{
@@ -121,7 +121,7 @@ $("products").addEventListener("click",e=>{
  $("largePhotoDialog").showModal();
 });
 $("products").addEventListener("keydown",e=>{
- if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("zoomable-photo")){e.preventDefault();e.target.click()}
+ if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("zooble-photo")){e.preventDefault();e.target.click()}
 });
 $("closeLargePhoto").onclick=()=>$("largePhotoDialog").close();
 $("largePhotoDialog").addEventListener("click",e=>{if(e.target===$("largePhotoDialog"))$("largePhotoDialog").close()});
