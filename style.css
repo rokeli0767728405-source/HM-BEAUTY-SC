@@ -62,3 +62,34 @@ dialog{background:#10283f;color:#eaf2fc;border:1px solid #294969}dialog input,di
 .category-item button {
   color: #ffffff !important;
 }
+
+/* إصلاح وضوح الكتابة داخل نوافذ التطبيق */
+dialog form input:not([type="file"]),
+dialog form select {
+  background: #f8fafc !important;
+  color: #18221e !important;
+  border: 1px solid #294969 !important;
+  -webkit-text-fill-color: #18221e !important;
+}
+
+dialog form input::placeholder {
+  color: #718078 !important;
+  opacity: 1 !important;
+}
+
+dialog form select option {
+  background: #ffffff !important;
+  color: #18221e !important;
+}
+
+dialog form label {
+  color: #eaf2fc !important;
+}
+
+dialog .photo-picker {
+  color: #18221e !important;
+}
+
+dialog .photo-picker small {
+  color: #718078 !important;
+}
