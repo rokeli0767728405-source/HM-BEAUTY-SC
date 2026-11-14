@@ -1,0 +1,7 @@
+{
+ "name":"HM BEAUTY SC - Product Manager",
+ "short_name":"HM BEAUTY SC",
+ "lang":"ar","dir":"rtl","start_url":"./","scope":"./","display":"standalone",
+ "background_color":"#f4f6f4","theme_color":"#183b2f",
+ "description":"إدارة المنتجات والباركود والصور والأسعار والمخزون بدون إنترنت"
+}
