@@ -47,6 +47,17 @@ function restoreDraft(){
   $("productDialog").showModal();
  }catch(e){}
 }
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="hidden" && $("productDialog").open){
+  saveDraft();
+ }
+});
+
+window.addEventListener("pagehide",()=>{
+ if($("productDialog").open){
+  saveDraft();
+ }
+});
 function money(n){return Number(n||0).toLocaleString("fr-MA",{minimumFractionDigits:2,maximumFractionDigits:2})+" DH"}
 function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2600)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -276,4 +287,5 @@ $("scannerDialog").addEventListener("close",stopScanner);
 function showScanResult(p,code){$("scanResultPhoto").src=p.photo||"";$("scanResultPhoto").style.display=p.photo?"block":"none";$("scanProductName").textContent=p.name;$("scanProductPrice").textContent=money(p.sellPrice??p.price);$("scanProductBuy").textContent=money(p.buyPrice??p.price);$("scanProductQty").textContent=p.quantity+" قطعة";$("scanProductCode").textContent=code;$("scanResultDialog").showModal()}
 $("closeScanResult").onclick=$("scanResultDone").onclick=()=>$("scanResultDialog").close();
 renderCategoryUI();render();
+restoreDraft();
 if("serviceWorker"in navigator&&location.protocol!=="file:")navigator.serviceWorker.register("./sw.js").catch(()=>{});
