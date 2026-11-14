@@ -48,3 +48,17 @@ main{max-width:760px;padding:18px 16px 28px}
 dialog{background:#10283f;color:#eaf2fc;border:1px solid #294969}dialog input,dialog select{background:#071b2d;color:#f0f5fc}
 #video{width:100%;height:auto;max-height:65vh;min-height:240px;object-fit:cover;background:#000}
 @media(max-width:390px){.donut{width:140px;height:140px}.stock-visual{gap:10px}.summary-card strong{font-size:16px}}
+/* إصلاح وضوح أسماء الفئات */
+.category-item {
+  background: #10283f !important;
+  border: 1px solid #294969 !important;
+}
+
+.category-item > span {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.category-item button {
+  color: #ffffff !important;
+}
