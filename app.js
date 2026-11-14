@@ -115,25 +115,116 @@ $("restoreFile").onchange=async e=>{
  }catch{toast("ملف النسخة الاحتياطية غير صالح")}e.target.value="";
 };
 async function stopScanner(){scanActive=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$("video").srcObject=null}
+
 async function startScanner(){
- if(!("BarcodeDetector"in window)){toast("المتصفح لا يدعم المسح؛ أدخل الباركود يدوياً");return}
+ if(!("BarcodeDetector" in window)){
+  toast("المتصفح لا يدعم المسح؛ أدخل الباركود يدوياً");
+  return;
+ }
+
  try{
-  const detector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","qr_code"]});
-  stream=await navigator.mediaDevices.getUserMedia({video:{
-   facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:60}
-  },audio:false});
-  const videoTrack=stream.getVideoTracks()[0];
-  if(videoTrack){try{const caps=videoTrack.getCapabilities?.()||{},advanced={};
-   if(caps.focusMode?.includes("continuous"))advanced.focusMode="continuous";
-   if(caps.exposureMode?.includes("continuous"))advanced.exposureMode="continuous";
-   if(Object.keys(advanced).length)await videoTrack.applyConstraints({advanced:[advanced]});
-  }catch{}}
-  $("video").srcObject=stream;$("scannerDialog").showModal();await $("video").play();scanActive=true;
-  $("scanMessage").textContent="وجّه الكاميرا نحو الباركود.";
-  const tick=async()=>{if(!scanActive)return;try{const codes=await detector.detect($("video"));if(codes.length){const code=codes[0].rawValue;await stopScanner();$("scannerDialog").close();$("search").value=code;render();const found=products.find(p=>p.barcode===code);if(found)showScanResult(found,code);else{openForm();$("barcode").value=code;toast("باركود جديد: أكمل بيانات المنتج")}return}}catch{}requestAnimationFrame(tick)};
+  const detector = new BarcodeDetector({
+   formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","qr_code"]
+  });
+
+  stream = await navigator.mediaDevices.getUserMedia({
+   video:{
+    facingMode:{ideal:"environment"},
+    width:{ideal:2560},
+    height:{ideal:1440},
+    frameRate:{ideal:30,max:60}
+   },
+   audio:false
+  });
+
+  const videoTrack = stream.getVideoTracks()[0];
+
+  if(videoTrack){
+   try{
+    const caps = videoTrack.getCapabilities?.() || {};
+    const advanced = {};
+
+    if(caps.focusMode?.includes("continuous"))
+     advanced.focusMode = "continuous";
+
+    if(caps.exposureMode?.includes("continuous"))
+     advanced.exposureMode = "continuous";
+
+    if(caps.zoom){
+     advanced.zoom = Math.min(
+      caps.zoom.max,
+      Math.max(caps.zoom.min, 1.5)
+     );
+    }
+
+    if(Object.keys(advanced).length){
+     await videoTrack.applyConstraints({
+      advanced:[advanced]
+     });
+    }
+   }catch(e){}
+  }
+
+  const video = $("video");
+  video.srcObject = stream;
+  video.playsInline = true;
+  video.setAttribute("playsinline","");
+  $("scannerDialog").showModal();
+
+  await video.play();
+
+  scanActive = true;
+  $("scanMessage").textContent =
+   "قرّب الكاميرا من الباركود وثبّت الهاتف قليلاً.";
+
+  let detecting = false;
+
+  const tick = async()=>{
+   if(!scanActive) return;
+
+   if(!detecting){
+    detecting = true;
+
+    try{
+     const codes = await detector.detect(video);
+
+     if(codes.length){
+      const code = codes[0].rawValue;
+
+      await stopScanner();
+      $("scannerDialog").close();
+      $("search").value = code;
+      render();
+
+      const found = products.find(p=>p.barcode===code);
+
+      if(found){
+       showScanResult(found,code);
+      }else{
+       openForm();
+       $("barcode").value = code;
+       toast("باركود جديد: أكمل بيانات المنتج");
+      }
+      return;
+     }
+    }catch(e){}
+
+    detecting = false;
+   }
+
+   if(scanActive){
+    setTimeout(()=>requestAnimationFrame(tick),100);
+   }
+  };
+
   requestAnimationFrame(tick);
- }catch{toast("تعذر تشغيل الكاميرا. اسمح بالوصول للكاميرا وافتح التطبيق عبر HTTPS")}
+
+ }catch(e){
+  console.error(e);
+  toast("تعذر تشغيل الكاميرا. تحقق من صلاحية الكاميرا.");
+ }
 }
+
 $("scanBtn").onclick=startScanner;$("scanFromForm").onclick=async()=>{await startScanner()};
 $("closeScanner").onclick=async()=>{await stopScanner();$("scannerDialog").close()};
 $("manualBarcode").onclick=async()=>{await stopScanner();$("scannerDialog").close();const code=prompt("أدخل رقم الباركود:");if(code){$("search").value=code;render();const found=products.find(p=>p.barcode===code);if(found)showScanResult(found,code);else{openForm();$("barcode").value=code}}};
