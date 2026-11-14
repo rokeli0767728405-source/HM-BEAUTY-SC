@@ -93,3 +93,33 @@ dialog .photo-picker {
 dialog .photo-picker small {
   color: #718078 !important;
 }
+
+/* إصلاح نهائي للكتابة والأرقام داخل النوافذ */
+dialog input,
+dialog select,
+dialog textarea {
+  color: #18221e !important;
+  -webkit-text-fill-color: #18221e !important;
+  opacity: 1 !important;
+  caret-color: #18221e !important;
+  background-color: #ffffff !important;
+}
+
+dialog input::placeholder,
+dialog textarea::placeholder {
+  color: #777777 !important;
+  -webkit-text-fill-color: #777777 !important;
+  opacity: 1 !important;
+}
+
+dialog input:-webkit-autofill {
+  -webkit-text-fill-color: #18221e !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+}
+
+dialog input:focus,
+dialog select:focus {
+  color: #18221e !important;
+  -webkit-text-fill-color: #18221e !important;
+  background-color: #ffffff !important;
+}
