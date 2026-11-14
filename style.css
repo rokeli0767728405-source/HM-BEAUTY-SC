@@ -15,3 +15,36 @@ dialog{border:0;border-radius:18px;width:min(94vw,500px);padding:19px;box-shadow
 .photo-lightbox .dialog-head{margin-bottom:10px}
 .photo-lightbox .close{background:#ffffff20;color:#fff}
 #largeProductPhoto{display:block;width:100%;max-height:78vh;object-fit:contain;border-radius:12px;background:#080b09}
+
+/* HM BEAUTY SC - dark navy dashboard redesign */
+:root{--green:#1765df;--green2:#244b78;--bg:#061a2a;--ink:#eaf2fc;--muted:#8da2b8;--line:#203d5d;--white:#10283f;--red:#ef5360;--gold:#d2a45b}
+body{background:#061a2a;color:#eaf2fc;padding-bottom:104px}
+.topbar{background:#061a2a;padding:22px 20px 14px;border-bottom:1px solid #183552}
+.brand{font-size:23px;color:#f2f6ff;font-weight:850;letter-spacing:.4px}.brand span{color:#d6bd8b}
+.brand-wrap small{color:#91a6bd}
+main{max-width:760px;padding:18px 16px 28px}
+.dashboard-title{margin:8px 2px 18px}.dashboard-title h1{font-size:21px;margin:0 0 6px}.dashboard-title p{margin:0;color:var(--muted);font-size:13px}
+.summary-card,.product,.stock-panel{background:#10283f;border:1px solid #234365;box-shadow:0 2px 12px #0002;border-radius:18px;color:#eaf2fc}
+.summary-card{padding:15px 12px}.summary-card small{color:#9bb0c6}.summary-card strong{font-size:19px;color:#51d5ad}
+.summary-card.warning strong{color:#ffbf3c}
+.search-row input,.category-tools select,input,select{background:#10283f;color:#eaf2fc;border-color:#294969}
+.search-row input::placeholder{color:#8da2b8}
+.secondary,.scan-btn{background:#132e49;color:#dceaff;border:1px solid #294969}
+.primary{background:#1262e9;color:white}
+.section-head{margin-top:28px}.section-head h2,.panel-heading h2{color:#f2f6ff}
+.section-head span,.meta,.hint{color:#8da2b8}
+.product{padding:13px;border-radius:15px}.product h3{color:#f0f5fc}.prices{background:#0b2034;border-radius:12px;border:0}
+.product-actions{border-color:#29435e}
+.stock-panel{margin-top:16px;padding:18px;border-radius:18px}
+.panel-heading h2{font-size:19px;margin:0 0 5px}.panel-heading small{color:#8da2b8}
+.stock-visual{display:flex;align-items:center;justify-content:space-around;gap:18px;padding:24px 0 8px}
+.stock-legend{display:grid;gap:14px;min-width:125px}.stock-legend>div{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:8px;color:#91a6bd;font-size:13px}.stock-legend b{color:#f2f6ff;font-size:16px}
+.dot{width:12px;height:12px;border-radius:50%;display:block}.available{background:#35d2a2}.low-dot{background:#ffbf3c}.empty-dot{background:#ef5360}
+.donut{width:170px;height:170px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#35d2a2 0 80%,#ffbf3c 80% 90%,#ef5360 90% 100%);position:relative}
+.donut:before{content:"";position:absolute;inset:25px;background:#10283f;border-radius:50%}.donut>div{position:relative;display:grid;text-align:center}.donut strong{font-size:27px;color:#f2f6ff}.donut small{color:#91a6bd}
+.bottom-nav{background:#10283f;border-top:1px solid #294969;height:82px;display:flex;justify-content:space-around;align-items:center}
+.bottom-nav a,.bottom-nav button{color:#9bb0c6;text-decoration:none;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:23px}
+.bottom-nav small{font-size:11px}.bottom-nav .active{color:#1674ff}
+dialog{background:#10283f;color:#eaf2fc;border:1px solid #294969}dialog input,dialog select{background:#071b2d;color:#f0f5fc}
+#video{width:100%;height:auto;max-height:65vh;min-height:240px;object-fit:cover;background:#000}
+@media(max-width:390px){.donut{width:140px;height:140px}.stock-visual{gap:10px}.summary-card strong{font-size:16px}}

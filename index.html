@@ -2,25 +2,30 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#183b2f"><meta name="description" content="HM BEAUTY SC لإدارة المنتجات والمخزون">
+<meta name="theme-color" content="#071b2d"><meta name="description" content="HM BEAUTY SC لإدارة المنتجات والمخزون">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
 <title>HM BEAUTY SC</title>
 </head>
 <body>
-<header class="topbar"><div><div class="brand">HM <span>BEAUTY SC</span></div><small>إدارة المنتجات والمخزون</small></div><button id="backupTop" class="icon-btn" title="نسخ احتياطي">⬇</button></header>
+<header class="topbar"><div class="brand-wrap"><div class="brand">HM BEAUTY SC</div><small>إدارة المنتجات والمخزون</small></div><button id="backupTop" class="icon-btn" title="نسخ احتياطي">⇩</button></header>
 <main>
-<section class="summary">
+<section class="dashboard-title" id="dashboard"><h1>حالة المخزون</h1><p>ملخص عام لمخزونك الحالي</p></section>\n<section class="summary">
  <div class="summary-card"><small>عدد المنتجات</small><strong id="productCount">0</strong></div>
  <div class="summary-card"><small>قيمة المخزون بسعر الشراء</small><strong id="stockValue">0 DH</strong></div>
  <div class="summary-card"><small>الربح المتوقع بالمخزون</small><strong id="profitValue">0 DH</strong></div>
 </section>
 <section class="summary summary-two"><div class="summary-card warning"><small>منتجات مخزونها منخفض</small><strong id="lowCount">0</strong></div><div class="summary-card"><small>قيمة المبيعات التقديرية</small><strong id="salesValue">0 DH</strong></div></section>
+<section class="stock-panel">
+ <div class="panel-heading"><h2>توزيع المخزون</h2><small>المنتجات حسب حالة المخزون</small></div>
+ <div class="stock-visual"><div class="stock-legend"><div><i class="dot available"></i><span>متوفر</span><b id="availableCount">0</b></div><div><i class="dot low-dot"></i><span>مخزون منخفض</span><b id="chartLowCount">0</b></div><div><i class="dot empty-dot"></i><span>غير متوفر</span><b id="emptyCount">0</b></div></div><div class="donut" id="stockDonut"><div><strong id="stockTotal">0</strong><small>منتج</small></div></div></div>
+</section>
+
 <section class="search-row"><input id="search" type="search" placeholder="ابحث باسم المنتج أو الباركود..." autocomplete="off"><button id="scanBtn" class="scan-btn">▦ مسح</button></section>
 <section class="category-tools"><select id="categoryFilter" aria-label="تصفية حسب الفئة"><option value="">جميع الفئات</option></select><button id="manageCategoriesBtn" class="secondary">إدارة الفئات</button></section>
 <section class="actions"><button id="addBtn" class="primary">＋ إضافة منتج</button><button id="backupBtn" class="secondary">نسخ احتياطي</button><button id="restoreBtn" class="secondary">استرجاع</button><input id="restoreFile" type="file" accept="application/json,.json" hidden></section>
-<section class="section-head"><h2>قائمة المنتجات</h2><span id="resultCount">0 منتج</span></section><div id="products" class="products"></div><div id="empty" class="empty">لا توجد منتجات بعد.<br>اضغط «إضافة منتج» للبدء.</div>
+<section class="section-head" id="productsSection"><h2>قائمة المنتجات</h2><span id="resultCount">0 منتج</span></section><div id="products" class="products"></div><div id="empty" class="empty">لا توجد منتجات بعد.<br>اضغط «إضافة منتج» للبدء.</div>
 </main>
-<nav class="bottom-nav"><span class="active">▦ <small>المنتجات</small></span><button id="navAdd">＋ <small>إضافة</small></button><button id="navBackup">⇅ <small>البيانات</small></button></nav>
+<nav class="bottom-nav"><a href="#dashboard" class="active">⌂ <small>الرئيسية</small></a><a href="#productsSection">▦ <small>المنتجات</small></a><button id="navAdd">＋ <small>إضافة</small></button><button id="navBackup">⇅ <small>البيانات</small></button></nav>
 <dialog id="productDialog"><form id="productForm" method="dialog"><div class="dialog-head"><h2 id="formTitle">إضافة منتج</h2><button type="button" class="close" id="closeDialog">×</button></div>
 <input type="hidden" id="productId"><label>صورة المنتج</label><div class="photo-picker"><img id="photoPreview" alt="معاينة صورة المنتج"><div><input id="photo" type="file" accept="image/*" capture="environment"><small>التقط صورة أو اخترها من الهاتف</small><button type="button" id="removePhoto" class="text-btn">حذف الصورة</button></div></div>
 <label>اسم المنتج *</label><input id="name" required maxlength="100" placeholder="مثلاً: شامبو غارنييه">

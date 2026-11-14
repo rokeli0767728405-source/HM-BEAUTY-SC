@@ -7,8 +7,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f6f4",
-  "theme_color": "#143d30",
+  "background_color": "#061a2a",
+  "theme_color": "#061a2a",
   "description": "إدارة المنتجات والباركود والصور والأسعار والمخزون بدون إنترنت",
   "icons": [
     {

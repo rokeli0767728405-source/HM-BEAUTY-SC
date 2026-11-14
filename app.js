@@ -26,6 +26,14 @@ function render(){
  $("profitValue").textContent=money(products.reduce((s,p)=>s+(Number(p.sellPrice??p.price??0)-Number(p.buyPrice??p.price??0))*Number(p.quantity||0),0));
  $("salesValue").textContent=money(products.reduce((s,p)=>s+Number(p.sellPrice??p.price??0)*Number(p.quantity||0),0));
  $("lowCount").textContent=products.filter(p=>Number(p.quantity)<=Number(p.threshold??3)).length;
+ const available=products.filter(p=>Number(p.quantity)>Number(p.threshold??3)).length;
+ const low=products.filter(p=>Number(p.quantity)>0&&Number(p.quantity)<=Number(p.threshold??3)).length;
+ const empty=products.filter(p=>Number(p.quantity)<=0).length,total=products.length||1;
+ if($("availableCount"))$("availableCount").textContent=available;
+ if($("chartLowCount"))$("chartLowCount").textContent=low;
+ if($("emptyCount"))$("emptyCount").textContent=empty;
+ if($("stockTotal"))$("stockTotal").textContent=products.length;
+ if($("stockDonut"))$("stockDonut").style.background=`conic-gradient(#35d2a2 0 ${available/total*100}%,#ffbf3c ${available/total*100}% ${(available+low)/total*100}%,#ef5360 ${(available+low)/total*100}% 100%)`;
  $("resultCount").textContent=filtered.length+" منتج";$("empty").style.display=filtered.length?"none":"block";
  $("products").innerHTML=filtered.map(p=>{const buy=Number(p.buyPrice??p.price??0),sell=Number(p.sellPrice??p.price??0),low=Number(p.quantity)<=Number(p.threshold??3);return `<article class="product"><div class="product-main">${p.photo?`<img class="product-photo zoomable-photo" src="${p.photo}" alt="صورة ${esc(p.name)}" data-photo="${esc(p.id)}" role="button" tabindex="0" title="اضغط لتكبير الصورة">`:`<div class="product-photo placeholder">HM</div>`}<div class="product-info"><h3>${esc(p.name)}</h3><div class="meta">${p.barcode?"الباركود: "+esc(p.barcode):"بدون باركود"} • ${esc(catName(p.categoryId))}</div><div class="stock ${low?"low":""}">الكمية: ${Number(p.quantity)||0} ${low?"• مخزون منخفض":""}</div></div></div><div class="prices"><div>البيع <b>${money(sell)}</b></div><div>الشراء <b>${money(buy)}</b></div><div class="unit-profit">ربح القطعة <b>${money(sell-buy)}</b></div></div><div class="product-actions"><button class="secondary" data-edit="${esc(p.id)}">تعديل</button><button class="secondary" data-sell="${esc(p.id)}">− قطعة</button><button class="secondary" data-delete="${esc(p.id)}">حذف</button></div></article>`}).join("");
 }
@@ -111,7 +119,15 @@ async function startScanner(){
  if(!("BarcodeDetector"in window)){toast("المتصفح لا يدعم المسح؛ أدخل الباركود يدوياً");return}
  try{
   const detector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","qr_code"]});
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});
+  stream=await navigator.mediaDevices.getUserMedia({video:{
+   facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:60}
+  },audio:false});
+  const videoTrack=stream.getVideoTracks()[0];
+  if(videoTrack){try{const caps=videoTrack.getCapabilities?.()||{},advanced={};
+   if(caps.focusMode?.includes("continuous"))advanced.focusMode="continuous";
+   if(caps.exposureMode?.includes("continuous"))advanced.exposureMode="continuous";
+   if(Object.keys(advanced).length)await videoTrack.applyConstraints({advanced:[advanced]});
+  }catch{}}
   $("video").srcObject=stream;$("scannerDialog").showModal();await $("video").play();scanActive=true;
   $("scanMessage").textContent="وجّه الكاميرا نحو الباركود.";
   const tick=async()=>{if(!scanActive)return;try{const codes=await detector.detect($("video"));if(codes.length){const code=codes[0].rawValue;await stopScanner();$("scannerDialog").close();$("search").value=code;render();const found=products.find(p=>p.barcode===code);if(found)showScanResult(found,code);else{openForm();$("barcode").value=code;toast("باركود جديد: أكمل بيانات المنتج")}return}}catch{}requestAnimationFrame(tick)};
