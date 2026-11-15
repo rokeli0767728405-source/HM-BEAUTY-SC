@@ -5,11 +5,14 @@
 <meta name="theme-color" content="#071b2d"><meta name="description" content="HM BEAUTY SC لإدارة المنتجات والمخزون">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
 <title>HM BEAUTY SC</title>
+<link rel="stylesheet" href="modules.css">
 </head>
 <body>
 <header class="topbar"><div class="brand-wrap"><div class="brand">HM BEAUTY SC</div><small>إدارة المنتجات والمخزون</small></div><button id="backupTop" class="icon-btn" title="نسخ احتياطي">⇩</button></header>
 <main>
-<section class="dashboard-title" id="dashboard"><h1>حالة المخزون</h1><p>ملخص عام لمخزونك الحالي</p></section>\n<section class="summary">
+<section id="homeView" data-view-panel>
+<section class="dashboard-title" id="dashboard"><h1>حالة المخزون</h1><p>ملخص عام لمخزونك الحالي</p></section>
+<section class="summary">
  <div class="summary-card"><small>عدد المنتجات</small><strong id="productCount">0</strong></div>
  <div class="summary-card"><small>قيمة المخزون بسعر الشراء</small><strong id="stockValue">0 DH</strong></div>
  <div class="summary-card"><small>الربح المتوقع بالمخزون</small><strong id="profitValue">0 DH</strong></div>
@@ -24,8 +27,32 @@
 <section class="category-tools"><select id="categoryFilter" aria-label="تصفية حسب الفئة"><option value="">جميع الفئات</option></select><button id="manageCategoriesBtn" class="secondary">إدارة الفئات</button></section>
 <section class="actions"><button id="addBtn" class="primary">＋ إضافة منتج</button><button id="backupBtn" class="secondary">نسخ احتياطي</button><button id="restoreBtn" class="secondary">استرجاع</button><input id="restoreFile" type="file" accept="application/json,.json" hidden></section>
 <section class="section-head" id="productsSection"><h2>قائمة المنتجات</h2><span id="resultCount">0 منتج</span></section><div id="products" class="products"></div><div id="empty" class="empty">لا توجد منتجات بعد.<br>اضغط «إضافة منتج» للبدء.</div>
+</section>
+<section id="posView" data-view-panel hidden>
+ <div class="view-title"><h1>نقطة البيع</h1><p>أنشئ فاتورة وخصم الكمية تلقائياً من المخزون</p></div>
+ <input id="posSearch" class="wide-input" placeholder="ابحث عن منتج أو امسح الباركود..." autocomplete="off">
+ <div id="posProducts" class="pos-grid"></div>
+ <div class="module-card"><h2>سلة البيع</h2><label>اسم العميل (اختياري)</label><input id="saleCustomer" placeholder="زبون نقدي"><label>طريقة الدفع</label><select id="salePayment"><option>نقداً</option><option>بطاقة</option><option>تحويل بنكي</option><option>آجل</option></select><div id="cartLines"></div><div class="cart-total"><span>الإجمالي</span><strong id="cartTotal">0 DH</strong></div><div class="button-row"><button id="clearCartBtn" class="secondary">إفراغ السلة</button><button id="checkoutBtn" class="primary">تأكيد البيع</button></div></div>
+ <div class="section-head"><h2>آخر المبيعات</h2></div><div id="salesHistory" class="record-list"></div>
+</section>
+<section id="opsView" data-view-panel hidden>
+ <div class="view-title"><h1>العمليات</h1><p>المشتريات والموردون والعملاء والمصاريف</p></div>
+ <div class="module-card"><h2>تسجيل مشتريات جديدة</h2><form id="purchaseForm"><label>المنتج</label><select id="purchaseProduct" required></select><div class="field-grid"><div><label>الكمية</label><input id="purchaseQty" type="number" min="1" step="1" required></div><div><label>ثمن الشراء للوحدة (DH)</label><input id="purchaseCost" type="number" min="0" step="0.01" required></div></div><label>المورد (اختياري)</label><input id="purchaseSupplier" placeholder="اسم المورد"><button class="primary full" type="submit">تسجيل الشراء وإضافة المخزون</button></form></div>
+ <div class="module-card"><h2>آخر المشتريات</h2><div id="purchaseRecords" class="record-list"></div></div>
+ <div class="module-card"><h2>تسجيل مصروف</h2><form id="expenseForm"><label>وصف المصروف</label><input id="expenseTitle" required placeholder="مثلاً: كراء المحل"><div class="field-grid"><div><label>المبلغ (DH)</label><input id="expenseAmount" type="number" min="0.01" step="0.01" required></div><div><label>التصنيف</label><select id="expenseCategory"><option>كراء</option><option>نقل</option><option>كهرباء وماء</option><option>أجور</option><option>أخرى</option></select></div></div><button class="primary full" type="submit">حفظ المصروف</button></form><div id="expenseRecords" class="record-list"></div></div>
+ <div class="module-card"><div class="module-heading"><h2>الموردون</h2><button id="addSupplierBtn" class="secondary">＋ إضافة</button></div><div id="supplierList" class="record-list"></div></div>
+ <div class="module-card"><div class="module-heading"><h2>العملاء</h2><button id="addCustomerBtn" class="secondary">＋ إضافة</button></div><div id="customerList" class="record-list"></div></div>
+</section>
+<section id="reportsView" data-view-panel hidden>
+ <div class="view-title"><h1>التقارير والأرباح</h1><p>ملخص المبيعات والمصاريف للشهر الحالي</p></div>
+ <div class="summary summary-two"><div class="summary-card"><small>المبيعات</small><strong id="reportRevenue">0 DH</strong></div><div class="summary-card"><small>تكلفة البضاعة المباعة</small><strong id="reportCost">0 DH</strong></div><div class="summary-card"><small>المصاريف</small><strong id="reportExpenses">0 DH</strong></div><div class="summary-card"><small>صافي الربح التقديري</small><strong id="reportProfit">0 DH</strong></div></div>
+ <div class="module-card"><div class="module-heading"><h2>ملخص الفواتير</h2><span id="reportSalesCount">0</span></div><button id="exportReportBtn" class="secondary full">تصدير المبيعات CSV لفتحها في Excel</button></div>
+ <div class="module-card"><h2>المنتجات الأكثر مبيعاً</h2><div id="topProducts" class="record-list"></div></div>
+ <div class="module-card"><h2>سجل النشاط</h2><div id="activityList" class="record-list"></div></div>
+ <div class="module-card"><h2>النسخ الاحتياطي</h2><p class="hint">يشمل المنتجات وصورها والفئات والمبيعات والمشتريات والموردين والعملاء والمصاريف.</p><div class="button-row"><button id="backupBtn2" class="primary">تصدير نسخة كاملة</button><button id="restoreBtn2" class="secondary">استعادة نسخة</button></div></div>
+</section>
 </main>
-<nav class="bottom-nav"><a href="#dashboard" class="active">⌂ <small>الرئيسية</small></a><a href="#productsSection">▦ <small>المنتجات</small></a><button id="navAdd">＋ <small>إضافة</small></button><button id="navBackup">⇅ <small>البيانات</small></button></nav>
+<nav class="bottom-nav"><button data-view="homeView" class="active">⌂ <small>الرئيسية</small></button><button data-view="posView">▣ <small>المبيعات</small></button><button data-view="opsView">⇄ <small>العمليات</small></button><button data-view="reportsView">▤ <small>التقارير</small></button></nav>
 <dialog id="productDialog"><form id="productForm" method="dialog"><div class="dialog-head"><h2 id="formTitle">إضافة منتج</h2><button type="button" class="close" id="closeDialog">×</button></div>
 <input type="hidden" id="productId"><label>صورة المنتج</label><div class="photo-picker"><img id="photoPreview" alt="معاينة صورة المنتج"><div><input id="photo" type="file" accept="image/*" capture="environment"><small>التقط صورة أو اخترها من الهاتف</small><button type="button" id="removePhoto" class="text-btn">حذف الصورة</button></div></div>
 <label>اسم المنتج *</label><input id="name" required maxlength="100" placeholder="مثلاً: شامبو غارنييه">
@@ -39,5 +66,5 @@
 <dialog id="largePhotoDialog" class="photo-lightbox"><div class="dialog-head"><h2 id="largePhotoTitle">صورة المنتج</h2><button type="button" class="close" id="closeLargePhoto">×</button></div><img id="largeProductPhoto" alt="صورة المنتج مكبرة"></dialog>
 <dialog id="scannerDialog"><div class="dialog-head"><h2>مسح الباركود</h2><button type="button" class="close" id="closeScanner">×</button></div><video id="video" playsinline></video><p id="scanMessage" class="hint">وجّه الكاميرا نحو خطوط الباركود.</p><button id="manualBarcode" class="secondary full">إدخال الباركود يدوياً</button></dialog>
 <dialog id="scanResultDialog"><div class="dialog-head"><h2>معلومات المنتج</h2><button type="button" class="close" id="closeScanResult">×</button></div><div class="scan-result"><img id="scanResultPhoto" alt="صورة المنتج"><small>اسم المنتج</small><h2 id="scanProductName">—</h2><small>ثمن البيع</small><strong id="scanProductPrice">—</strong><small>ثمن الشراء</small><b id="scanProductBuy">—</b><small>الكمية المتوفرة</small><b id="scanProductQty">—</b><small>الباركود</small><code id="scanProductCode">—</code></div><button id="scanResultDone" class="primary full">حسناً</button></dialog>
-<div id="toast" role="status"></div><script src="app.js"></script>
+<button id="navAdd" hidden></button><button id="navBackup" hidden></button><div id="toast" role="status"></div><script src="app.js"></script><script src="modules.js"></script>
 </body></html>

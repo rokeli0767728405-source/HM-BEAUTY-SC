@@ -1,6 +1,5 @@
 const DB_KEY="hm_beauty_sc_products_v3";
 const CAT_KEY="hm_beauty_sc_categories_v1";
-const DRAFT_KEY="hm_beauty_sc_draft_v1";
 let products=loadProducts(),categories=loadCategories(),stream=null,scanActive=false,pendingPhoto="";
 const $=id=>document.getElementById(id);
 
@@ -8,56 +7,6 @@ function loadProducts(){try{return JSON.parse(localStorage.getItem(DB_KEY)||"[]"
 function loadCategories(){try{const a=JSON.parse(localStorage.getItem(CAT_KEY)||"[]");return Array.isArray(a)?a:[]}catch{return []}}
 function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(products));localStorage.setItem(CAT_KEY,JSON.stringify(categories));render()}catch(e){toast("مساحة التخزين ممتلئة. خفّض حجم الصور أو صدّر نسخة احتياطية.")}}
 function saveCategories(){try{localStorage.setItem(CAT_KEY,JSON.stringify(categories));renderCategoryUI();render()}catch{toast("تعذر حفظ الفئات")}}
-function saveDraft(){
- try{
-  const draft={
-   id:$("productId").value,
-   name:$("name").value,
-   barcode:$("barcode").value,
-   buyPrice:$("buyPrice").value,
-   sellPrice:$("sellPrice").value,
-   quantity:$("quantity").value,
-   threshold:$("threshold").value,
-   categoryId:$("category").value,
-   photo:pendingPhoto
-  };
-  localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));
- }catch(e){}
-}
-
-function restoreDraft(){
- try{
-  const raw=localStorage.getItem(DRAFT_KEY);
-  if(!raw)return;
-  const d=JSON.parse(raw);
-  if(!d||typeof d!=="object")return;
-  $("productId").value=d.id||"";
-  $("name").value=d.name||"";
-  $("barcode").value=d.barcode||"";
-  $("buyPrice").value=d.buyPrice??"";
-  $("sellPrice").value=d.sellPrice??"";
-  $("quantity").value=d.quantity??0;
-  $("threshold").value=d.threshold??3;
-  pendingPhoto=d.photo||"";
-  renderCategoryUI();
-  $("category").value=d.categoryId||"";
-  updatePhotoPreview();
-  updateProfit();
-  $("formTitle").textContent=d.id?"تعديل منتج":"إضافة منتج";
-  $("productDialog").showModal();
- }catch(e){}
-}
-document.addEventListener("visibilitychange",()=>{
- if(document.visibilityState==="hidden" && $("productDialog").open){
-  saveDraft();
- }
-});
-
-window.addEventListener("pagehide",()=>{
- if($("productDialog").open){
-  saveDraft();
- }
-});
 function money(n){return Number(n||0).toLocaleString("fr-MA",{minimumFractionDigits:2,maximumFractionDigits:2})+" DH"}
 function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2600)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -101,13 +50,9 @@ function updateProfit(){$("unitProfit").textContent=money(Number($("sellPrice").
 $("addBtn").onclick=$("navAdd").onclick=()=>openForm();
 $("closeDialog").onclick=$("cancelForm").onclick=()=>$("productDialog").close();
 $("buyPrice").oninput=$("sellPrice").oninput=updateProfit;
-$("photo").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")){toast("اختر ملف صورة صحيحاً");return}try{pendingPhoto=await compressImage(f);updatePhotoPreview();saveDraft()}catch{toast("تعذرت قراءة الصورة")}};
+$("photo").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")){toast("اختر ملف صورة صحيحاً");return}try{pendingPhoto=await compressImage(f);updatePhotoPreview()}catch{toast("تعذرت قراءة الصورة")}};
 function compressImage(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,640/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",.62))};img.onerror=reject;img.src=url})}
 $("removePhoto").onclick=()=>{pendingPhoto="";$("photo").value="";updatePhotoPreview()};
-["name","barcode","buyPrice","sellPrice","quantity","threshold","category"].forEach(id=>{
-  $(id).addEventListener("input",saveDraft);
-  $(id).addEventListener("change",saveDraft);
-});
 $("productForm").onsubmit=e=>{
  e.preventDefault();const id=$("productId").value||String(Date.now());
  const item={id,name:$("name").value.trim(),barcode:$("barcode").value.trim(),buyPrice:Number($("buyPrice").value),sellPrice:Number($("sellPrice").value),quantity:Math.max(0,Number($("quantity").value)),threshold:Math.max(0,Number($("threshold").value)),photo:pendingPhoto,categoryId:$("category").value||""};
@@ -132,7 +77,7 @@ $("products").addEventListener("click",e=>{
  $("largePhotoDialog").showModal();
 });
 $("products").addEventListener("keydown",e=>{
- if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("zooble-photo")){e.preventDefault();e.target.click()}
+ if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("zoomable-photo")){e.preventDefault();e.target.click()}
 });
 $("closeLargePhoto").onclick=()=>$("largePhotoDialog").close();
 $("largePhotoDialog").addEventListener("click",e=>{if(e.target===$("largePhotoDialog"))$("largePhotoDialog").close()});
@@ -170,116 +115,25 @@ $("restoreFile").onchange=async e=>{
  }catch{toast("ملف النسخة الاحتياطية غير صالح")}e.target.value="";
 };
 async function stopScanner(){scanActive=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$("video").srcObject=null}
-
 async function startScanner(){
- if(!("BarcodeDetector" in window)){
-  toast("المتصفح لا يدعم المسح؛ أدخل الباركود يدوياً");
-  return;
- }
-
+ if(!("BarcodeDetector"in window)){toast("المتصفح لا يدعم المسح؛ أدخل الباركود يدوياً");return}
  try{
-  const detector = new BarcodeDetector({
-   formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","qr_code"]
-  });
-
-  stream = await navigator.mediaDevices.getUserMedia({
-   video:{
-    facingMode:{ideal:"environment"},
-    width:{ideal:2560},
-    height:{ideal:1440},
-    frameRate:{ideal:30,max:60}
-   },
-   audio:false
-  });
-
-  const videoTrack = stream.getVideoTracks()[0];
-
-  if(videoTrack){
-   try{
-    const caps = videoTrack.getCapabilities?.() || {};
-    const advanced = {};
-
-    if(caps.focusMode?.includes("continuous"))
-     advanced.focusMode = "continuous";
-
-    if(caps.exposureMode?.includes("continuous"))
-     advanced.exposureMode = "continuous";
-
-    if(caps.zoom){
-     advanced.zoom = Math.min(
-      caps.zoom.max,
-      Math.max(caps.zoom.min, 1.5)
-     );
-    }
-
-    if(Object.keys(advanced).length){
-     await videoTrack.applyConstraints({
-      advanced:[advanced]
-     });
-    }
-   }catch(e){}
-  }
-
-  const video = $("video");
-  video.srcObject = stream;
-  video.playsInline = true;
-  video.setAttribute("playsinline","");
-  $("scannerDialog").showModal();
-
-  await video.play();
-
-  scanActive = true;
-  $("scanMessage").textContent =
-   "قرّب الكاميرا من الباركود وثبّت الهاتف قليلاً.";
-
-  let detecting = false;
-
-  const tick = async()=>{
-   if(!scanActive) return;
-
-   if(!detecting){
-    detecting = true;
-
-    try{
-     const codes = await detector.detect(video);
-
-     if(codes.length){
-      const code = codes[0].rawValue;
-
-      await stopScanner();
-      $("scannerDialog").close();
-      $("search").value = code;
-      render();
-
-      const found = products.find(p=>p.barcode===code);
-
-      if(found){
-       showScanResult(found,code);
-      }else{
-  if(!$("productDialog").open) openForm();
-  $("barcode").value = code;
-  toast("باركود جديد: أكمل بيانات المنتج");
-      }
-      return;
-     }
-    }catch(e){}
-
-    detecting = false;
-   }
-
-   if(scanActive){
-    setTimeout(()=>requestAnimationFrame(tick),100);
-   }
-  };
-
+  const detector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","qr_code"]});
+  stream=await navigator.mediaDevices.getUserMedia({video:{
+   facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:60}
+  },audio:false});
+  const videoTrack=stream.getVideoTracks()[0];
+  if(videoTrack){try{const caps=videoTrack.getCapabilities?.()||{},advanced={};
+   if(caps.focusMode?.includes("continuous"))advanced.focusMode="continuous";
+   if(caps.exposureMode?.includes("continuous"))advanced.exposureMode="continuous";
+   if(Object.keys(advanced).length)await videoTrack.applyConstraints({advanced:[advanced]});
+  }catch{}}
+  $("video").srcObject=stream;$("scannerDialog").showModal();await $("video").play();scanActive=true;
+  $("scanMessage").textContent="وجّه الكاميرا نحو الباركود.";
+  const tick=async()=>{if(!scanActive)return;try{const codes=await detector.detect($("video"));if(codes.length){const code=codes[0].rawValue;await stopScanner();$("scannerDialog").close();$("search").value=code;render();const found=products.find(p=>p.barcode===code);if(found)showScanResult(found,code);else{openForm();$("barcode").value=code;toast("باركود جديد: أكمل بيانات المنتج")}return}}catch{}requestAnimationFrame(tick)};
   requestAnimationFrame(tick);
-
- }catch(e){
-  console.error(e);
-  toast("تعذر تشغيل الكاميرا. تحقق من صلاحية الكاميرا.");
- }
+ }catch{toast("تعذر تشغيل الكاميرا. اسمح بالوصول للكاميرا وافتح التطبيق عبر HTTPS")}
 }
-
 $("scanBtn").onclick=startScanner;$("scanFromForm").onclick=async()=>{await startScanner()};
 $("closeScanner").onclick=async()=>{await stopScanner();$("scannerDialog").close()};
 $("manualBarcode").onclick=async()=>{await stopScanner();$("scannerDialog").close();const code=prompt("أدخل رقم الباركود:");if(code){$("search").value=code;render();const found=products.find(p=>p.barcode===code);if(found)showScanResult(found,code);else{openForm();$("barcode").value=code}}};
@@ -287,5 +141,4 @@ $("scannerDialog").addEventListener("close",stopScanner);
 function showScanResult(p,code){$("scanResultPhoto").src=p.photo||"";$("scanResultPhoto").style.display=p.photo?"block":"none";$("scanProductName").textContent=p.name;$("scanProductPrice").textContent=money(p.sellPrice??p.price);$("scanProductBuy").textContent=money(p.buyPrice??p.price);$("scanProductQty").textContent=p.quantity+" قطعة";$("scanProductCode").textContent=code;$("scanResultDialog").showModal()}
 $("closeScanResult").onclick=$("scanResultDone").onclick=()=>$("scanResultDialog").close();
 renderCategoryUI();render();
-restoreDraft();
 if("serviceWorker"in navigator&&location.protocol!=="file:")navigator.serviceWorker.register("./sw.js").catch(()=>{});

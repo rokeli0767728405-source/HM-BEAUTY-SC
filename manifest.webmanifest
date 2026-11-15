@@ -1,6 +1,6 @@
 
 {
-  "name": "HM BEAUTY SC - Product Manager",
+  "name": "HM BEAUTY SC - Business Manager",
   "short_name": "HM BEAUTY SC",
   "lang": "ar",
   "dir": "rtl",
@@ -9,7 +9,7 @@
   "display": "standalone",
   "background_color": "#061a2a",
   "theme_color": "#061a2a",
-  "description": "إدارة المنتجات والباركود والصور والأسعار والمخزون بدون إنترنت",
+  "description": "إدارة المبيعات والمخزون والمشتريات والموردين والعملاء والمصاريف",
   "icons": [
     {
       "src": "./icon-192.png",
